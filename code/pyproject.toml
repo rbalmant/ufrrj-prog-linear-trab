@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "code"
+version = "0.1.0"
+description = "Final LP course assignment"
+authors = [
+    "Raphael Balmant <raphael.balmant@gmail.com>",
+    "Elis Braga <elisbragaa@ufrrj.br>"
+]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">3.9, <=3.12"
+highspy = "^1.5.3"
+numpy = "^1.26.1"
+notebook = "^7.0.6"
+pandas = "^2.1.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
