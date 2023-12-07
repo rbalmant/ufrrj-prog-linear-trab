@@ -1,18 +1,22 @@
 from os import path
 import pandas as pd
-from train.lpda import lpda, simple_predict
+from train.lpda import lpda, simple_predict, predict
 from data_utils import get_data_folder
-from dataset import diabetes
+from dataset import heart, diabetes, tree
 
 def main():
-    train = pd.read_csv(path.join(get_data_folder(), diabetes.folder, diabetes.file))
+    train = pd.read_csv(path.join(get_data_folder(), heart.folder, heart.file))
 
-    a, b, X_test = lpda(train, diabetes.y_column)
+    a, b, X_test, y_test = lpda(train, heart.y_column)
 
+    # Solution to problem
     print(a)
     print(b)
 
-    for i in X_test:
-        simple_predict(a, b, i)
+    # Calculate some metrics based on test data
+    precision, accuracy, f1 = predict(a, b, X_test, y_test)
+    print(f"Precision: {str(precision)}")
+    print(f"Accuracy: {str(accuracy)}")
+    print(f"F1 Score: {str(f1)}")
 
 main()

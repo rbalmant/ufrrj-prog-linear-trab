@@ -56,8 +56,9 @@ def split_data(data_train: pd.DataFrame, class_col_str: str, data_test: pd.DataF
     X1 = X1.to_numpy()[:, :-1]
     X2 = X2.to_numpy()[:, :-1]
     X_test = X_test.to_numpy()[:, :-1]
+    y_test = y_test.to_numpy()
 
     # Please note the last column gets removed due being the classification column, since data is partitioned into sets per category there is not reason for this column.
 
     logging.debug("<< (data_utils) split_data(data_train, class_col_str, data_test, stratify, test_size)")
-    return X1, X2, X_test
+    return X1, X2, X_test, y_test

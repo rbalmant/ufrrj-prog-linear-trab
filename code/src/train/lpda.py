@@ -6,13 +6,14 @@ from os import path
 import gzip
 import pickle
 from pulp import *
+from sklearn.metrics import precision_score, accuracy_score, f1_score
 
 from data_utils import split_data, get_data_folder
 
-def lpda(data_train: pd.DataFrame, y_column: str, data_test: pd.DataFrame = None) -> (list, float, np.array):
+def lpda(data_train: pd.DataFrame, y_column: str, data_test: pd.DataFrame = None) -> (list, float, np.array, np.array):
     logging.debug(">> (lpda) lpda(data group)")
 
-    X1, X2, X_test = split_data(data_train, y_column, data_test, 0.2)
+    X1, X2, X_test, y_test = split_data(data_train, y_column, data_test, 0.2)
 
     # Now we can define and solve our LP problem using Pulp library with a solver of our choice
     prob = LpProblem("Heart_Disease_LPDA", LpMinimize)
@@ -83,7 +84,7 @@ def lpda(data_train: pd.DataFrame, y_column: str, data_test: pd.DataFrame = None
         if v.name.startswith('a'):
             a.insert(int(v.name.replace('a', '')), v.varValue)
 
-    return a, b, X_test
+    return a, b, X_test, y_test
 
 def lpda_save_to_file(file_name, a, b):
     model = {
@@ -111,12 +112,41 @@ def lpda_load_from_file(file_name):
 
 def simple_predict(a, b, test):
     logging.debug(">> (lpda) predict(a, b, test)")
-    
+
     # "Above" hyperplane line -- blue colour in article
     if np.dot(test, a) - b >= 0:
         logging.debug("<< (lpda) predict(a, b, test)")
-        return 1
+        return 0
     # "Below" hyperplane line -- red colour in article
     else:
         logging.debug("<< (lpda) predict(a, b, test)")
-        return 0
+        return 1
+    
+def calculate_scores(y_test, predictions):
+    logging.debug(">> (lpda) calculate_scores(y_test, predictions)")
+    precision = precision_score(y_test, predictions)
+    accuracy = accuracy_score(y_test, predictions)
+    f1 = f1_score(y_test, predictions)
+
+    logging.debug("<< (lpda) calculate_scores(y_test, predictions)")
+    return precision, accuracy, f1
+
+
+def predict(a, b, test_group, y_test):
+    logging.debug(">> (lpda) predict(a, b, test_group, y_test)")
+    predictions = []
+    for point in zip(test_group, y_test):
+        prediction = None
+
+        if np.dot(point[0], a) - b >= 0:
+            prediction = 0
+        else:
+            prediction = 1
+            
+        predictions.append(prediction)
+    
+    logging.debug("<< (lpda) predict(a, b, test_group, y_test)")
+    return calculate_scores(y_test, predictions)
+
+        
+
