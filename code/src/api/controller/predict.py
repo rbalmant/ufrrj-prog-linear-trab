@@ -8,13 +8,27 @@ from api.request.predict_request import PredictRequest
 
 router = APIRouter()
 
-@router.post("/predict")
+@router.post("/heart/predict")
 async def predict(payload: PredictRequest):
     logging.debug(">> (api.predict) predict(payload: PredictRequest)")
     prediction = None
     if payload is not None:
         try:
-            test = [vars(payload).values()]
+            test = [
+                 payload.age, 
+                 payload.age, 
+                 payload.cp, 
+                 payload.trestbps, 
+                 payload.chol,
+                 payload.fbs,
+                 payload.restecg,
+                 payload.thalach,
+                 payload.exang,
+                 payload.oldpeak,
+                 payload.slope,
+                 payload.ca,
+                 payload.thal
+            ]
             a, b = lpda_load_from_file("model.dat")
             prediction = simple_predict(a, b, test)
         except Exception as e:
