@@ -13,3 +13,5 @@ def main():
 
     for i in X_test:
         simple_predict(a, b, i)
+
+main()
