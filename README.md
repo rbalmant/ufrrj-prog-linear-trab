@@ -28,14 +28,14 @@ Guardando o arquivo de modelo em disco, foi possível implementar um servidor de
 
 As rotas implementadas foram as seguintes no servidor de aplicação
 
-- ``POST /train``
-- ``POST /predict``
+- ``POST /heart/train``
+- ``POST /heart/predict``
 
 Exemplos de chamadas:
 
-- Treinamento: ``curl --request POST --url http://localhost:8080/train``
+- Treinamento: ``curl --request POST --url http://localhost:8080/heart/train``
 - Predição: ``curl --request POST \
-  --url http://localhost:8080/predict \
+  --url http://localhost:8080/heart/predict \
   --header 'Content-Type: application/json' \
   --data '{
 	"age": 19,
