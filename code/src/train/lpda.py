@@ -1,123 +1,122 @@
 import logging
 import numpy as np
 import pandas as pd
+from os import path
 
-from gzip import gzip
-from scipy.optimize import linprog
+import gzip
+import pickle
+from pulp import *
 
-from data_utils import split_data
+from data_utils import split_data, get_data_folder
 
-def lpda(data_train, y_column, data_test = None):
-    logging.debug(">> lpda(data group)")
+def lpda(data_train: pd.DataFrame, y_column: str, data_test: pd.DataFrame = None) -> (list, float, np.array):
+    logging.debug(">> (lpda) lpda(data group)")
 
-    X_train, X_test, y_test, aux = split_data(data_train, y_column, data_test, True, 0.4)
+    X1, X2, X_test = split_data(data_train, y_column, data_test, 0.2)
 
-    # Get partition from method split_data instead of doing additional calculation
-    X1 = aux[0]['X_train']
-    X2 = aux[1]['X_train']
+    # Now we can define and solve our LP problem using Pulp library with a solver of our choice
+    prob = LpProblem("Heart_Disease_LPDA", LpMinimize)
+    a = []
+    b = []
+    u = []
+    v = []
 
-    p = X_train.shape[1]
-    
     n1 = len(X1)
     n2 = len(X2)
     n = n1 + n2
 
-    m = np.repeat(1/n1, n1)
-    w = np.repeat(1/n2, n2)
+    # We will take mi = 1/n1 and wi = 1/n2, so features are of equal importance.
+    m = 1/n1
+    w = 1/n2
+    
+    # Define decision variable a & b (hyperplane H)
 
-    obj_f_vars = np.repeat(0, p+1)
+    # For a actually we have a vector of decision variable
+    for i in range(len(X1[0])):
+        ai = LpVariable("a"+ str(i), 0, None, LpContinuous)
+        a.append(ai)
+    
+    # On the other hand, b is scalar
+    b = LpVariable("b", 0, None, LpContinuous)
 
-    # Objective function
-    f = np.concatenate((m, w, obj_f_vars))
+    # Define decision variables ui and vj
+    for i in range(n1):
+        ui = LpVariable("u" + str(i), 0, None, LpContinuous)
+        u.append(ui)
 
-    #print(f)
+    for j in range(n2):
+        vj = LpVariable("v"+ str(j), 0, None, LpContinuous)
+        v.append(vj)
 
-    # A_ub
-    u1 = np.eye(n1) * -1
-    v1 = np.zeros((n1, n2))
 
-    buf = np.empty_like(X1)
-    ab1 = np.c_[np.multiply(float(-1), X1, buf), np.repeat(1, n1)]
+    u_sum = LpAffineExpression([(ui, m) for ui in u])
+    v_sum = LpAffineExpression([(vj, w) for vj in v])
 
-    B1 = np.c_[u1, v1, ab1]
+    # Objective function:
+    prob += lpSum([u_sum, v_sum])
 
-    u2 = u1
-    v2 = v1
-    ab2 = np.zeros((n1, p+1))
+    # Constraints
+    for i in range(n1):
+        prob += u[i] >= - lpDot(a, X1[i]) + b + 1, "u_const_"+str(i)
+        prob += u[i] >= 0, "u_const_non_negativity_"+str(i)
 
-    B2 = np.c_[u2, v2, ab2]
+    for j in range(n2):
+        prob += v[j] >= lpDot(a, X2[j]) - b + 1, "v_const_"+str(j)
+        prob += v[j] >= 0, "v_const_non_negativity_"+str(j)
 
-    u3 = np.zeros((n2, n1))
-    v3 = np.eye(n2) * -1
-    ab3 = np.c_[X2, np.repeat(-1, n2)]
+    prob.writeLP("lpProblem.lp")
 
-    B3 = np.c_[u3, v3, ab3]
+    # Solve using HiGHS solver (please see https://highs.dev/)
+    #prob.solve(HiGHS_CMD())
+    prob.solve()
 
-    u4 = u3
-    v4 = v3
-    ab4 = np.zeros((n2, p+1))
+    # The status of the solution is printed to the screen if logging is INFO level
+    logging.info("LP problem status: ", LpStatus[prob.status])
 
-    B4 = np.c_[u4, v4, ab4]
+    # Fetch values of a & b decision variables
+    a = []
+    b = None
+    for v in prob.variables():
+        #print(v.name, "=", v.varValue)
+        if v.name == 'b':
+            b = v.varValue
+        if v.name.startswith('a'):
+            a.insert(int(v.name.replace('a', '')), v.varValue)
 
-    A = np.concatenate((B1, B2, B3, B4))
+    return a, b, X_test
 
-    s1 = np.repeat(-1, n1)
-    s2 = np.repeat(0, n1)
-    s3 = np.repeat(-1, n2)
-    s4 = np.repeat(0, n2)
-
-    b = np.concatenate((s1, s2, s3, s4))
-
-    nvar = n + (p+1)
-
-    lower = [-np.inf for i in range(nvar)]
-    upper = [np.inf for i in range(nvar)]
-    bounds = list(zip(lower, upper))
-
-    #print(bounds)
-
-    # Attempt to solve the LP problem
-    result = None
-    try:
-        result = linprog(f, A_ub=A, b_ub=b, bounds=bounds, method='highs')
-    except Exception as e:
-        print(f"An error occurred during LP optimization: {e}")
-        return None
-    if result is None or not result.success:
-        print("LP optimization did not converge.")
-        return None
-    logging.debug("<< lpda(X, y)")
-    return result, X_test, y_test
-
-def lpda_save_to_file(file_path, result, X_test, y_test):
+def lpda_save_to_file(file_name, a, b):
     model = {
-        result,
-        X_test,
-        y_test
+       'h_a': a,
+       'h_b': b
     }
+
+    bytes = pickle.dumps(model)
+    file_path = path.join(get_data_folder(), file_name)
 
     # Very basic compression
     with gzip.open(file_path, 'wb') as f:
-        f.write(model)
+        f.write(bytes)
 
-def lpda_load_from_file(file_path):
+def lpda_load_from_file(file_name):
     model = {}
+    file_path = path.join(get_data_folder(), file_name)
 
     with gzip.open(file_path, 'rb') as f:
         model = f.read()
         
-    return model
+    model = pickle.loads(model)
 
-def predict(model, test):
-    logging.debug(">> predict(model, test)")
-        
-    # Hyperplane equation
-    coefficients = model.x[len(model.x) - test.shape[0]:]
-    #print(coefficients)
+    return model['h_a'], model['h_b']
 
-    # Binary classification
-    predict = np.dot(test, coefficients)
-    print(predict)
-        
-    logging.debug("<< predict(model, test)")
-    return predict
+def simple_predict(a, b, test):
+    logging.debug(">> (lpda) predict(a, b, test)")
+    
+    # "Above" hyperplane line -- blue colour in article
+    if np.dot(test, a) - b >= 0:
+        logging.debug("<< (lpda) predict(a, b, test)")
+        return 1
+    # "Below" hyperplane line -- red colour in article
+    else:
+        logging.debug("<< (lpda) predict(a, b, test)")
+        return 0
