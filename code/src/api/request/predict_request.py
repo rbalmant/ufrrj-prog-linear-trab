@@ -2,7 +2,7 @@
 from pydantic import BaseModel, Field
 
 
-class PredictRequest(BaseModel):
+class HeartPredictRequest(BaseModel):
     age: int = Field(..., description="Age of the person")
     sex: int = Field(..., description="Gender of the person")
     cp: int = Field(..., description="Chest Pain type chest pain type")

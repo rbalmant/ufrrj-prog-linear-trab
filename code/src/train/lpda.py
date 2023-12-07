@@ -99,7 +99,7 @@ def lpda_save_to_file(file_name, a, b):
     with gzip.open(file_path, 'wb') as f:
         f.write(bytes)
 
-def lpda_load_from_file(file_name):
+def lpda_load_from_file(file_name) -> (np.array, float):
     model = {}
     file_path = path.join(get_model_folder(), file_name)
 
@@ -110,7 +110,7 @@ def lpda_load_from_file(file_name):
 
     return model['h_a'], model['h_b']
 
-def simple_predict(a, b, test):
+def simple_predict(a, b, test) -> int:
     logging.debug(">> (lpda) predict(a, b, test)")
 
     # "Above" hyperplane line -- blue colour in article
@@ -122,7 +122,7 @@ def simple_predict(a, b, test):
         logging.debug("<< (lpda) predict(a, b, test)")
         return 1
     
-def calculate_scores(y_test, predictions):
+def calculate_scores(y_test, predictions) -> (float, float, float):
     logging.debug(">> (lpda) calculate_scores(y_test, predictions)")
     precision = precision_score(y_test, predictions)
     accuracy = accuracy_score(y_test, predictions)
@@ -132,7 +132,7 @@ def calculate_scores(y_test, predictions):
     return precision, accuracy, f1
 
 
-def predict(a, b, test_group, y_test):
+def predict(a, b, test_group, y_test) -> (float, float, float):
     logging.debug(">> (lpda) predict(a, b, test_group, y_test)")
     predictions = []
     for point in zip(test_group, y_test):
