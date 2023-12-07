@@ -1,15 +1,20 @@
+from io import StringIO
+import pandas as pd
 import numpy as np
-from scipy.optimize import linprog
-from sklearn.model_selection import train_test_split
-from train.lpda import LPDA
 
-# Generate synthetic data for illustration
-np.random.seed(42)
-X = np.random.rand(100, 2)  # Replace with your NHANES features
-y = (X[:, 0] + X[:, 1] > 1).astype(int)  # Binary labels based on a simple condition
+from train.lpda import lpda
+from utils import unzip_files_into_memory
 
-# LPDA Implementation
-lpda = LPDA()
-model, X_test, Y_test = lpda.lpda(X, y)
+files = unzip_files_into_memory('/data/gladiator_data.zip')
+dataset = files[0] # only 1 file in ZIP file
 
-print(model)
+df = pd.read_csv(StringIO(dataset))
+
+
+model, X_test = lpda(df, 'Survived')
+
+# Validate model
+
+# Predict, plot, etc
+
+
