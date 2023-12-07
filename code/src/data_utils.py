@@ -50,8 +50,11 @@ def split_data(data_train: pd.DataFrame, class_col_str: str, data_test: pd.DataF
         aux.append(category)
 
     # Get partition from method split_data instead of doing additional calculation
-    X1 = aux[0]['X_train'].to_numpy()[:, :-1]
-    X2 = aux[1]['X_train'].to_numpy()[:, :-1]
+    X1 = aux[0]['X_train']
+    X2 = aux[1]['X_train']
+
+    X1 = X1.to_numpy()[:, :-1]
+    X2 = X2.to_numpy()[:, :-1]
     X_test = X_test.to_numpy()[:, :-1]
 
     # Please note the last column gets removed due being the classification column, since data is partitioned into sets per category there is not reason for this column.
