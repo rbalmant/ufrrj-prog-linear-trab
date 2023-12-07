@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 
-
+def get_model_folder():
+    return path.join(__file__, '..', '..', 'model')
 def get_data_folder():
     return path.join(__file__, '..', '..', 'data')
 

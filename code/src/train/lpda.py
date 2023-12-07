@@ -8,7 +8,7 @@ import pickle
 from pulp import *
 from sklearn.metrics import precision_score, accuracy_score, f1_score
 
-from data_utils import split_data, get_data_folder
+from data_utils import split_data, get_model_folder
 
 def lpda(data_train: pd.DataFrame, y_column: str, data_test: pd.DataFrame = None) -> (list, float, np.array, np.array):
     logging.debug(">> (lpda) lpda(data group)")
@@ -93,7 +93,7 @@ def lpda_save_to_file(file_name, a, b):
     }
 
     bytes = pickle.dumps(model)
-    file_path = path.join(get_data_folder(), file_name)
+    file_path = path.join(get_model_folder(), file_name)
 
     # Very basic compression
     with gzip.open(file_path, 'wb') as f:
@@ -101,7 +101,7 @@ def lpda_save_to_file(file_name, a, b):
 
 def lpda_load_from_file(file_name):
     model = {}
-    file_path = path.join(get_data_folder(), file_name)
+    file_path = path.join(get_model_folder(), file_name)
 
     with gzip.open(file_path, 'rb') as f:
         model = f.read()
