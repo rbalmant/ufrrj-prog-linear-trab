@@ -65,8 +65,6 @@ def lpda(data_train: pd.DataFrame, y_column: str, data_test: pd.DataFrame = None
         prob += v[j] >= lpDot(a, X2[j]) - b + 1, "v_const_"+str(j)
         prob += v[j] >= 0, "v_const_non_negativity_"+str(j)
 
-    prob.writeLP("lpProblem.lp")
-
     # Solve using HiGHS solver (please see https://highs.dev/)
     #prob.solve(HiGHS_CMD())
     prob.solve()
