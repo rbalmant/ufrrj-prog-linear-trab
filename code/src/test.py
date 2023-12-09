@@ -55,5 +55,5 @@ def main(dataset: pd.DataFrame, y_column: str) -> ModelResult:
 
     return model_result
 
-model_result = main(heart, meta_heart.y_column)
-print(model_result)
+#model_result = main(heart, meta_heart.y_column)
+#print(model_result)
