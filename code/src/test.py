@@ -2,12 +2,12 @@ from os import path
 import pandas as pd
 from train.lpda import lpda, simple_predict, predict
 from data_utils import get_data_folder
-from dataset import heart, diabetes, tree
+from dataset import heart, diabetes
 
 def main():
-    train = pd.read_csv(path.join(get_data_folder(), heart.folder, heart.file))
+    train = pd.read_csv(path.join(get_data_folder(), diabetes.folder, diabetes.file))
 
-    a, b, X_test, y_test = lpda(train, heart.y_column)
+    a, b, X_test, y_test = lpda(train, diabetes.y_column)
 
     # Solution to problem
     print(a)
