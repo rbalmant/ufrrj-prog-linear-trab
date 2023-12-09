@@ -17,6 +17,11 @@ datasets_raw = [
         "folder": "diabetes",
         "file": "diabetes_binary_5050split_health_indicators_BRFSS2021.csv",
         "y_column": "Diabetes_binary"
+    },
+    {
+        "folder": "diabetes2",
+        "file": "diabetes_binary_health_indicators_BRFSS2021.csv",
+        "y_column": "Diabetes_binary"
     }
 ]
 
