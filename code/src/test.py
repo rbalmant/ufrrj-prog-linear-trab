@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from train.lpda import lpda, simple_predict, predict
 from data_utils import get_data_folder
-from dataset import heart, meta_heart, diabetes, meta_diabetes, diabetes2, meta_diabetes2
+from dataset import heart, meta_heart, diabetes, meta_diabetes
 
 class ModelResult:
     solution: dict
@@ -55,5 +55,5 @@ def main(dataset: pd.DataFrame, y_column: str) -> ModelResult:
 
     return model_result
 
-#model_result = main(heart, meta_heart.y_column)
-#print(model_result)
+model_result = main(heart, meta_heart.y_column)
+print(model_result)
