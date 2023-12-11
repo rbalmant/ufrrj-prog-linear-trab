@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from os import path
 import pandas as pd
 import numpy as np
@@ -56,4 +57,10 @@ def main(dataset: pd.DataFrame, y_column: str) -> ModelResult:
     return model_result
 
 model_result = main(heart, meta_heart.y_column)
+=======
+from model import model
+from dataset import heart, meta_heart
+
+model_result = model(heart, meta_heart.y_column)
+>>>>>>> 24b1a87b11301bad2f089872808e051f622f13b2
 print(model_result)
