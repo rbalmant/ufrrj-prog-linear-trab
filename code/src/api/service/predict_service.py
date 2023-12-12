@@ -10,7 +10,7 @@ class PredictService:
     def heart_predict(payload: HeartPredictRequest) -> int:
         test = [
             payload.age, 
-            payload.age, 
+            payload.sex, 
             payload.cp, 
             payload.trestbps, 
             payload.chol,
