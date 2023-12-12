@@ -3,7 +3,7 @@
 ---
 
 ### Programação Linear 2023-2
-#### *Nova Iguaçu, 11 de novembro de 2023*
+#### *Nova Iguaçu, 11 de dezembro de 2023*
 #### **Professor:** Erito Marques
 #### **Alunos:** 
 &emsp;Raphael Balmant
